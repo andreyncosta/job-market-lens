@@ -74,7 +74,6 @@ class JobStore:
                          description, url, salary_min, salary_max,
                          remote_flag, collected_at, raw)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    ON CONFLICT (source, external_id) DO NOTHING
                     """,
                     [
                         job.source,
@@ -91,10 +90,10 @@ class JobStore:
                         json.dumps(job.raw),
                     ],
                 )
-                inserted += self._con.fetchone()[0] if False else 1  # count approximation
+                inserted += 1
             except duckdb.ConstraintException:
-                pass  # duplicate — expected
-        logger.info(f"[store] Inserted up to {inserted} jobs (duplicates silently skipped)")
+                pass  # duplicate (source, external_id) — expected on re-runs
+        logger.info(f"[store] Inserted {inserted} new jobs ({len(jobs) - inserted} duplicates skipped)")
         return inserted
 
     def query_df(self, sql: str):
