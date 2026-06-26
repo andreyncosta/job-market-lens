@@ -42,19 +42,13 @@ def cmd_collect(args):
         df = store.query_df("SELECT id, title, description FROM jobs")
         logger.info(f"Extracting skills from {len(df)} job descriptions...")
 
+        total_skills = 0
         for _, row in df.iterrows():
             skills = extract_skills(row["description"] or "")
             if skills:
-                for skill in skills:
-                    try:
-                        store._con.execute(
-                            "INSERT INTO skills (job_id, skill) VALUES (?, ?) ON CONFLICT DO NOTHING",
-                            [row["id"], skill],
-                        )
-                    except Exception:
-                        pass
+                total_skills += store.insert_skills(int(row["id"]), skills)
 
-        logger.info("Skill extraction complete.")
+        logger.info(f"Skill extraction complete. {total_skills} new skill tags inserted.")
 
 
 def cmd_stats(args):
