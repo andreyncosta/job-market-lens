@@ -96,6 +96,26 @@ class JobStore:
         logger.info(f"[store] Inserted {inserted} new jobs ({len(jobs) - inserted} duplicates skipped)")
         return inserted
 
+    def insert_skills(self, job_id: int, skills: list[str]) -> int:
+        """Insert skill tags for a job, silently skipping duplicates.
+
+        Preferred over accessing _con directly: surfaces unexpected errors
+        instead of swallowing them, and keeps DuckDB interaction encapsulated.
+
+        Returns the count of newly inserted rows.
+        """
+        inserted = 0
+        for skill in skills:
+            try:
+                self._con.execute(
+                    "INSERT INTO skills (job_id, skill) VALUES (?, ?)",
+                    [job_id, skill],
+                )
+                inserted += 1
+            except duckdb.ConstraintException:
+                pass  # duplicate (job_id, skill) — expected on re-runs
+        return inserted
+
     def query_df(self, sql: str):
         """Return a pandas DataFrame for any SQL query."""
         return self._con.execute(sql).df()
