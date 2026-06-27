@@ -51,8 +51,13 @@ def cmd_collect(args):
                             "INSERT INTO skills (job_id, skill) VALUES (?, ?) ON CONFLICT DO NOTHING",
                             [row["id"], skill],
                         )
-                    except Exception:
-                        pass
+                    except Exception as exc:
+                        logger.debug(
+                            "[skills] Skipped skill %r for job %s: %s",
+                            skill,
+                            row["id"],
+                            exc,
+                        )
 
         logger.info("Skill extraction complete.")
 
@@ -76,6 +81,7 @@ def cmd_stats(args):
 
 
 def cmd_skills(args):
+    top = int(args.top)  # argparse already enforces int; explicit cast guards future refactors
     with JobStore(args.db) as store:
         df = store.query_df(f"""
             SELECT skill, COUNT(*) as frequency,
@@ -83,9 +89,9 @@ def cmd_skills(args):
             FROM skills
             GROUP BY skill
             ORDER BY frequency DESC
-            LIMIT {args.top}
+            LIMIT {top}
         """)
-        print(f"\nTop {args.top} skills across all collected jobs:\n")
+        print(f"\nTop {top} skills across all collected jobs:\n")
         print(df.to_string(index=False))
         print()
 
