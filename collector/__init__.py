@@ -4,10 +4,14 @@ collector — unified job collection pipeline.
 Orchestrates multiple source collectors and deduplicates results by external_id.
 """
 
+import logging
+
 from collector.adzuna import AdzunaCollector, RawJob
 from collector.jobicy import JobicyCollector
 
 __all__ = ["AdzunaCollector", "JobicyCollector", "RawJob", "collect_all"]
+
+logger = logging.getLogger(__name__)
 
 
 def collect_all(
@@ -42,7 +46,7 @@ def collect_all(
             ):
                 _dedup_add(job)
     except KeyError:
-        print("[collect_all] Adzuna credentials not set — skipping.")
+        logger.warning("[collect_all] Adzuna credentials not set — skipping.")
 
     # Jobicy
     with JobicyCollector() as jc:
