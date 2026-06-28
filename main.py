@@ -13,7 +13,7 @@ import os
 import sys
 
 from collector import collect_all
-from processor import extract_skills, extract_remote_signal
+from processor import extract_skills
 from storage import JobStore
 
 logging.basicConfig(
