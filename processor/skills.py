@@ -121,9 +121,20 @@ def extract_skills(text: str) -> list[str]:
 
 
 def extract_remote_signal(text: str) -> bool:
-    """
-    Secondary remote signal check on description text.
-    Supplements the source-level remote_flag.
+    """Check whether a job description contains strong remote-work signals.
+
+    Returns True if the text contains phrases that explicitly indicate a
+    fully-remote position (e.g. "fully remote", "100% remote", "work from
+    anywhere").  This is a *stricter* signal than the collector-level
+    ``remote_flag``, which also triggers on the broader word "remote".
+
+    .. note::
+        This function is not currently called anywhere in the pipeline.
+        It is intended to be used as a post-collection enrichment step —
+        for example, to add a ``strong_remote`` column in ``JobStore`` or
+        to re-score listings whose ``remote_flag`` was set only because the
+        word "remote" appeared incidentally.  Wire it in via
+        ``collect_all`` or as a separate ``cmd_enrich`` CLI command.
     """
     patterns = [
         r"\bfully remote\b",
