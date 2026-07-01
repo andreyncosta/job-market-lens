@@ -18,7 +18,11 @@ from dataclasses import dataclass
 SKILL_TAXONOMY: list[tuple[str, list[str]]] = [
     # Languages
     ("python", [r"\bpython\b"]),
-    ("r", [r"\br\b", r"\bR programming\b"]),
+    # NOTE: "\br\b" with IGNORECASE is intentionally omitted — it matches any
+    # standalone letter "r" in text (e.g. in abbreviations, bullet points, etc.)
+    # producing high false-positive rates. "R programming" and "R language" are
+    # sufficient to capture genuine R skill mentions.
+    ("r", [r"\bR programming\b", r"\bR language\b", r"\bin R\b"]),
     ("sql", [r"\bsql\b"]),
     ("scala", [r"\bscala\b"]),
     ("java", [r"\bjava\b"]),
